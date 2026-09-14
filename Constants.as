@@ -38,6 +38,9 @@ const array<string> TITLEPACKS = {
     "TMStadium",
     "TMValley",
     "TMLagoon",
+    "TMOneBay",
+    "TMOneSpeed",
+    "TMOneAlpine",
     "Unassigned"//MP3 canyon and stadium maps?
 };
 
@@ -63,7 +66,7 @@ const array<string> MAP_FIELDS_ARRAY = {
     "Tags",
     "Exebuild"
 };
-const string MAP_FIELDS = string::Join(MAP_FIELDS_ARRAY, ",");
+const string MAP_FIELDS = Text::Join(MAP_FIELDS_ARRAY, ",");
 
 enum CheckTypes{ //used for building location IDs
     Bronze = 0,

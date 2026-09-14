@@ -44,7 +44,7 @@ class SearchCriteria {
             }
             else if (json.HasKey("map_ids")) {
                 array<string> id_list = JsonToStringArray(json["map_ids"]);
-                this.map_ids = string::Join(id_list, ",");
+                this.map_ids = Text::Join(id_list, ",");
             }
             this.name = json.Get("name", "");
             this.uploaded_after = json.Get("uploaded_after", "");
@@ -101,10 +101,8 @@ class SearchCriteria {
         params.Set("count", "1");
         params.Set("maptype", SUPPORTED_MAP_TYPE);
 #if MP4
-        string titlepack = CurrentTitlePack();
-        if (titlepack == "TMAll"){
-            titlepack = TITLEPACKS[Math::Rand(0,TITLEPACKS.Length)];
-        }
+        auto installedTitlePacks = GetInstalledTitlePacks(TITLEPACKS);
+        string titlepack = installedTitlePacks[Math::Rand(0, installedTitlePacks.Length)];
         params.Set("titlepack", titlepack);
 #endif
 
