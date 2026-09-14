@@ -46,7 +46,7 @@ array<string> GetInstalledTitlePacks(const array<string>& in targetPacks) {
 
             // Handles both plain IDs ("TMCanyon") and full IDs ("TMCanyon@nadeo")
             if (title.TitleId == packName || title.TitleId.StartsWith(packName + "@")) {
-                installedPacks.InsertLast(title.TitleId);
+                installedPacks.InsertLast(packName);
                 break;
             }
         }
@@ -79,8 +79,14 @@ void BackToStationsMenu() {
         yield();
     }
 
-    // Extra yield when requesting exit out of a titlepack / Map Selection
+    ClosePauseMenu();
     yield();
+    BackToMainMenu();
+
+    // Extra yield  when requesting exit out of a titlepack / Map Selection
+    while (!app.ManiaTitleControlScriptAPI.IsReady) {
+        yield();
+    }
 
     string url = "maniaplanet://#menustations=";
     app.ManiaPlanetScriptAPI.OpenLink(url, CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser);
@@ -100,17 +106,19 @@ bool LoadTitlePack(const string &in titlepack) {
     auto title = MatchTitlePack(titlepack);
     if (title is null)
     {
-        Log::Error('Failed to load title pack "' + titlepack + '"\nMake sure you have it installed!');
+        Log::Error('Title pack "' + titlepack + '" not found.\nMake sure you have it installed!');
         return false;
     }
 
     string url = "maniaplanet://#menustations=play@" + title.TitleId;
     app.ManiaPlanetScriptAPI.OpenLink(url, CGameManiaPlanetScriptAPI::ELinkType::ManialinkBrowser);
-    sleep(1000);
+    yield();
+    sleep(100);
 
     UI::ShowNotification("Loading title pack...", title.TitleId);
     app.ManiaPlanetScriptAPI.EnterTitle(title.TitleId);
-    sleep(1000);
+    yield();
+    sleep(100);
 
     while(app.LoadedManiaTitle is null || !app.ManiaTitleControlScriptAPI.IsReady) {
         yield();

@@ -139,6 +139,9 @@ class SearchCriteria {
             // Only use default etags and max time, and no other custom search parameters
             params.Set("etag", ETAGS);
             params.Set("authortimemax", tostring(MAX_AUTHOR_TIME));
+
+            // Allow all installed titlepacks in the search
+            params.Set("titlepack", Text::Join(installedTitlePacks, ','));
         }
 
         string urlParams = DictToApiParams(params);
