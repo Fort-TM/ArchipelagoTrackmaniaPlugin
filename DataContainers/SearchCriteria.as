@@ -2,6 +2,7 @@ class SearchCriteria {
     bool forceSafeURL = false; // Ignores all but map_tags, sets default etags
 
     // Default options, always present in slot_data
+    string map_environments;
     string map_tags;
     string map_etags;
     string difficulties;
@@ -23,12 +24,20 @@ class SearchCriteria {
     SearchCriteria(int seriesI, const Json::Value &in json, bool fromSlotData = false) {
         try {
             if (!fromSlotData) {
+#if MP4
+                this.map_environments = json["preconverted_map_environments"];
+#endif
                 this.map_tags = json["preconverted_map_tags"];
                 this.map_etags = json["preconverted_map_etags"];
                 this.difficulties = json["preconverted_difficulties"];
                 this.forceSafeURL = JsonGetAsBool(json, "forceSafeURL");
             }
             else {
+#if MP4
+                array<string> raw_environment_list = JsonToStringArray(json["map_environments"]);
+                array<string> environment_list = NormalizeTitlePackNames(raw_environment_list);
+                this.map_environments = Text::Join(environment_list, ",");
+#endif
                 array<string> tag_list = JsonToStringArray(json["map_tags"]);
                 this.map_tags = BuildTagIdString(tag_list);
                 array<string> etag_list = JsonToStringArray(json["map_etags"]);
@@ -68,6 +77,9 @@ class SearchCriteria {
         try {
             json["forceSafeURL"] = this.forceSafeURL;
 
+#if MP4
+            json["preconverted_map_environments"] = this.map_environments;
+#endif
             json["preconverted_map_tags"] = this.map_tags;
             json["preconverted_map_etags"] = this.map_etags;
             json["preconverted_difficulties"] = this.difficulties;
@@ -101,8 +113,13 @@ class SearchCriteria {
         params.Set("count", "1");
         params.Set("maptype", SUPPORTED_MAP_TYPE);
 #if MP4
-        auto installedTitlePacks = GetInstalledTitlePacks(TITLEPACKS);
-        string titlepack = installedTitlePacks[Math::Rand(0, installedTitlePacks.Length)];
+        auto titlePacks = GetInstalledTitlePacks(this.map_environments.Split(","));
+        if (titlePacks.Length == 0)
+        {
+            // If we couldn't find a matching one from the slot's map environments, get a random installed pack
+            titlePacks = GetInstalledTitlePacks(TITLEPACKS);
+        }
+        string titlepack = titlePacks[Math::Rand(0, titlePacks.Length)];
         params.Set("titlepack", titlepack);
 #endif
 
@@ -148,8 +165,10 @@ class SearchCriteria {
             params.Set("etag", ETAGS);
             params.Set("authortimemax", tostring(MAX_AUTHOR_TIME));
 
+#if MP4
             // Allow all installed titlepacks in the search
-            params.Set("titlepack", Text::Join(installedTitlePacks, ','));
+            params.Set("titlepack", Text::Join(titlePacks, ','));
+#endif
         }
 
         string urlParams = DictToApiParams(params);
