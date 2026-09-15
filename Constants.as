@@ -33,15 +33,19 @@ const int BASE_TRAP_ID                  = 24050;
 const float DISCOUNT_PERCENT            = .015;
 
 const array<string> TITLEPACKS = {
-    "TMAll",//envimix stuff it seems?
-    "TMCanyon",
-    "TMStadium",
-    "TMValley",
-    "TMLagoon",
-    "TMOneBay",
-    "TMOneSpeed",
-    "TMOneAlpine",
-    "Unassigned"//MP3 canyon and stadium maps?
+    "TMCanyon",     // By Nadeo
+    "TMStadium",    // By Nadeo
+    "TMValley",     // By Nadeo
+    "TMLagoon",     // By Nadeo
+
+    "TMAll",        // By @domino54
+
+    "TMOneBay",     // By @unbitn
+    "TMOneSpeed",   // By @unbitn
+    "TMOneAlpine",  // By @unbitn
+    "TM2U_Island",  // By @adamkooo
+
+    "Unassigned"    // MP3 canyon and stadium maps?
 };
 
 const array<string> MAP_FIELDS_ARRAY = {
