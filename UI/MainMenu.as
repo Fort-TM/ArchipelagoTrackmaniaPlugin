@@ -8,15 +8,18 @@ void RenderMainMenu(){
     int flags = UI::WindowFlags::NoCollapse | UI::WindowFlags::NoDocking | UI::WindowFlags::AlwaysAutoResize;
     if (UI::Begin("Archipelago - Menu", isOpen, flags)){
 
+        float scale = UI::GetScale() / 1.5;
+
         if (data is null){
             UI::Text("Awaiting Server Connection...");
         }else{
-            vec2 viewSize = vec2(600,700);
-            float manMarn = 4;
-            float indent = 20;
+            vec2 viewSize = vec2(600, 700);
+            vec2 viewSizeWindow = viewSize * scale;
+            float manMarn = 4 * scale;
+            float indent = 20 * scale;
             bool seriesInitializing = false;
             UI::PushStyleVar(UI::StyleVar::FramePadding, vec2(4, 8));
-            UI::BeginChild("Serieses", viewSize);
+            UI::BeginChild("Serieses", viewSizeWindow);
             if (!shownBefore){
                 shownBefore = true;
                 UI::SetScrollHereY();
@@ -25,23 +28,37 @@ void RenderMainMenu(){
                 UI::PushFont(fontHeader);
                 UI::Text ("Series " + (i+1));
                 UI::PopFont();
-                MoveCursor(vec2(0,manMarn));
+                VPadding(manMarn);
                 UI::Separator();
-                MoveCursor(vec2(0,manMarn));
+                VPadding(manMarn);
                 UI::Indent(indent);
                 if (data.world[i].IsUnlocked() && data.world[i].initialized){
                     for (int j = 0; j < data.world[i].mapCount; j++){
-                        UI::BeginGroup();
-                        float lineHeight = 100;
                         MapState@ map = data.world[i].maps[j];
 
+                        UI::BeginGroup();
+
                         vec2 cursorStart = UI::GetCursorPos();
-                        float width  = viewSize.x-30;
-                        float height = 48;
-                        float verticalOffset = -6;
-                        vec2 startPos = UI::GetCursorPos() + vec2(-22,verticalOffset)  +UI::GetWindowPos() - vec2(0, UI::GetScrollY())+ vec2(viewSize.x/2,0.0);
-                        vec2 endPos = UI::GetCursorPos() + vec2(-22,height+verticalOffset) +UI::GetWindowPos() - vec2(0, UI::GetScrollY())+ vec2(viewSize.x/2,0.0);
-                        vec4 bgRect = vec4(startPos.x - (width/2),startPos.y,width,endPos.y - startPos.y);
+                        float width  = (viewSize.x - 30) * scale;
+                        float height = 48 * scale;
+                        float verticalOffset = -6 * scale;
+
+                        vec2 startPos = UI::GetCursorPos() + UI::GetWindowPos()
+                            + vec2(-22, verticalOffset) * scale
+                            - vec2(0, UI::GetScrollY())
+                            + vec2(viewSizeWindow.x / 2, 0.0);
+
+                        vec2 endPos = UI::GetCursorPos() + UI::GetWindowPos()
+                            + (vec2(-22, height + verticalOffset)) * scale
+                            - vec2(0, UI::GetScrollY())
+                            + vec2(viewSizeWindow.x / 2, 0.0);
+
+                        vec4 bgRect = vec4(
+                            startPos.x - (width / 2),
+                            startPos.y,
+                            width,
+                            endPos.y - startPos.y
+                        );
 
                         if (map.mapIndex % 2 == 1){
                             UI::GetWindowDrawList().AddRectFilled(bgRect, vec4(1,1,1,0.04), 5);
@@ -56,10 +73,15 @@ void RenderMainMenu(){
                         UI::PopFont();
 
                         // Map Name
-                        UI::PushFont(fontHeaderSub);
-                        UI::PushFontSize(16);
                         UI::SameLine();
-                        MoveCursor(vec2(0,-4));
+                        // HPadding(-4);
+
+                        UI::BeginChild("MapNameAndAuthor" + i + "_" + j, vec2(width, height));
+
+                        UI::PushFont(fontHeaderSub);
+                        UI::PushFontSize(16 * scale);
+
+                        // MoveCursor(vec2(0,-4 * scale));
                         string mapName = map.mapInfo.Name;
                         if (mapName.Length > 35){
                             mapName = mapName.SubStr(0,32)+"...";
@@ -69,19 +91,21 @@ void RenderMainMenu(){
                         UI::PopFont();
 
                         // Author and Titlepack
-                        MoveCursor(vec2(60, -16));
+                        // UI::SameLine();
+                        // HPadding(-4, false);
+                        // MoveCursor(vec2(60, -16) * scale);-*
                         UI::PushStyleColor(UI::Col::Text, vec4(0.7,0.7,0.7,1.0));
-                        UI::PushFontSize(12);
+                        UI::PushFontSize(12 * scale);
                         UI::Text("by " + map.mapInfo.Username + " / " + map.mapInfo.TitlePack);
                         UI::PopFontSize();
                         UI::PopStyleColor();
 
-                        MoveCursor(vec2(viewSize.x - 170, -40));
-                        DrawChecksRemaining(map.seriesIndex, map.mapIndex, false);
+                        UI::EndChild();
 
-                        UI::Dummy(vec2(0,0));
+                        // MoveCursor(vec2(viewSize.x - (170 * scale), -40 * scale));
+                        // DrawChecksRemaining(map.seriesIndex, map.mapIndex, false);
 
-                        vec2 cursorEnd = UI::GetCursorPos();
+                        // UI::Dummy(vec2(0,0));
 
                         if (data.locations.GotAllChecks(map.seriesIndex, map.mapIndex) || map.skipped){
                             if (map.skipped){
@@ -90,8 +114,6 @@ void RenderMainMenu(){
                                 UI::GetWindowDrawList().AddRectFilled(bgRect, vec4(0,0.96,0.12,0.15), 5);
                             }
                         }
-
-                        UI::EndGroup();
 
                         if (UI::IsItemHovered()){
                             RenderTooltip2(data.world[i].maps[j]);
@@ -102,6 +124,8 @@ void RenderMainMenu(){
                         if(UI::IsItemClicked(UI::MouseButton::Right)){
                             RerollMapFromUI(i, j);
                         }
+
+                        UI::EndGroup();
                     }
                 }else if (!data.world[i].IsUnlocked()){
                     UI::NewLine();

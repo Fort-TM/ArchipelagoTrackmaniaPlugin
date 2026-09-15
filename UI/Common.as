@@ -44,6 +44,20 @@ nvg::Texture@ authorTexNVGBottom;
 nvg::Texture@ archipelagoTexNVGBottom;
 #endif
 
+void HPadding(int x, bool sameLine = true) {
+    UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
+    UI::Dummy(vec2(x, 0));
+    if (sameLine) UI::SameLine();
+    UI::PopStyleVar();
+}
+
+void VPadding(int y, bool sameLine = false) {
+    UI::PushStyleVar(UI::StyleVar::ItemSpacing, vec2(0, 0));
+    UI::Dummy(vec2(0, y));
+    if (sameLine) UI::SameLine();
+    UI::PopStyleVar();
+}
+
 void RenderLoadingError(){
 
     //UI::SetNextWindowSize(600, 400, UI::Cond::Always);
@@ -78,12 +92,14 @@ void RenderInventory(){
     UI::EndTable();
 }
 
-void RenderMedalProgress(UI::Texture@ tex, float size, int count, int total){
-    float texSize = size;
+void RenderMedalProgress(UI::Texture@ tex, float size, int count, int total) {
+    float scale = UI::GetScale() / 1.5;
+    float texSize = size * scale;
     UI::Image(tex,vec2(texSize,texSize));
     UI::SameLine();
     UI::PushFont(fontHeaderSub);
-    MoveCursor(vec2(0.0,texSize*0.5-11));
+    float centeredTextPosition = texSize * 0.5 - (16 * scale);
+    MoveCursor(vec2(0.0, centeredTextPosition));
     UI::Text(""+count+"/"+total);
     UI::PopFont();
 }
